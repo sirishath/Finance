@@ -460,9 +460,9 @@ elif page == "HSA & FSA Savings Calculator":
     # User Inputs
     account_type = st.selectbox("Choose Account Type", ("HSA", "FSA"))
     if account_type == "HSA":
-        max = 4150;
+        max = 4150
     else:
-        max = 3200;
+        max = 3200
     contribution = st.number_input("Enter your annual contribution ($):", min_value=0, max_value=max, step=100)
     income = st.number_input("Enter your annual income ($):", min_value=0, step=1000)
     tax_rate = st.slider("Enter your estimated tax rate (%):", 0, 50, 20)
