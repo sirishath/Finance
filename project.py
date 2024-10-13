@@ -395,25 +395,80 @@ elif page == "Dashboard":
         with st.expander(faq['question']):
             st.write(faq['answer'])
 
-# HSA and FSA Savings Calculator Page
+# # HSA and FSA Savings Calculator Page
+# elif page == "HSA & FSA Savings Calculator":
+#     st.title("HSA and FSA Savings Calculator with Graph")
+#     st.write("""
+#     Estimate your potential tax savings when contributing to Health Savings Account (HSA) or Flexible Spending Account (FSA), and see the impact visually.
+#     """)
+
+#     # Layout: side-by-side columns for inputs and graph
+#     col1, col2 = st.columns(2)
+
+#     # Column 1: User Inputs
+#     with col1:
+#         account_type = st.selectbox("Choose Account Type", ("HSA", "FSA"))
+#         contribution = st.number_input("Enter your annual contribution ($):", min_value=0, max_value=10000, step=100)
+#         income = st.number_input("Enter your annual income ($):", min_value=0, step=1000)
+#         tax_rate = st.slider("Enter your estimated tax rate (%):", 0, 50, 20)
+        
+#         # Button to calculate
+#         calculate = st.button("Calculate")
+
+#     # Function to calculate tax savings
+#     def calculate_tax_savings(contribution, tax_rate):
+#         return contribution * (tax_rate / 100)
+
+#     # Only calculate and display results when button is clicked
+#     if calculate:
+#         # Calculate potential savings
+#         savings = calculate_tax_savings(contribution, tax_rate)
+
+#         # Column 2: Display Graph
+#         with col2:
+#             # Create the graph using Plotly
+#             fig = go.Figure(data=[
+#                 go.Bar(name="Contribution", x=["Contribution"], y=[contribution], marker_color='blue'),
+#                 go.Bar(name="Tax Savings", x=["Tax Savings"], y=[savings], marker_color='green')
+#             ])
+
+#             # Customize the layout of the graph
+#             fig.update_layout(
+#                 title="Contribution vs. Tax Savings",
+#                 xaxis_title="Category",
+#                 yaxis_title="Amount ($)",
+#                 barmode='group'
+#             )
+
+#             # Show the graph in Streamlit
+#             st.plotly_chart(fig)
+
+#         # Display the calculated savings below the inputs
+#         st.write(f"With an annual contribution of ${contribution:,} to your {account_type}, you could save approximately ${savings:,.2f} in taxes based on a tax rate of {tax_rate}%.")
+
+#     # Provide a reminder about contribution limits
+#     st.subheader("Contribution Limits (2024):")
+#     st.write("- **HSA**: Up to $4,150 (self-only) or $8,300 (family)")
+#     st.write("- **FSA**: Up to $3,200 (health care) or $5,000 (dependent care)")
+           
 elif page == "HSA & FSA Savings Calculator":
-    st.title("HSA and FSA Savings Calculator with Graph")
+    st.title("HSA and FSA Savings Calculator")
     st.write("""
-    Estimate your potential tax savings when contributing to Health Savings Account (HSA) or Flexible Spending Account (FSA), and see the impact visually.
+    Estimate your potential tax savings when contributing to Health Savings Account (HSA) or Flexible Spending Account (FSA).
     """)
 
-    # Layout: side-by-side columns for inputs and graph
-    col1, col2 = st.columns(2)
-
-    # Column 1: User Inputs
-    with col1:
-        account_type = st.selectbox("Choose Account Type", ("HSA", "FSA"))
-        contribution = st.number_input("Enter your annual contribution ($):", min_value=0, max_value=10000, step=100)
-        income = st.number_input("Enter your annual income ($):", min_value=0, step=1000)
-        tax_rate = st.slider("Enter your estimated tax rate (%):", 0, 50, 20)
-        
-        # Button to calculate
-        calculate = st.button("Calculate")
+    # User Inputs
+    account_type = st.selectbox("Choose Account Type", ("HSA", "FSA"))
+    if account_type == "HSA":
+        max = 4150;
+    else:
+        max = 3200;
+    contribution = st.number_input("Enter your annual contribution ($):", min_value=0, max_value=max, step=100)
+    income = st.number_input("Enter your annual income ($):", min_value=0, step=1000)
+    tax_rate = st.slider("Enter your estimated tax rate (%):", 0, 50, 20)
+    
+    # Button to calculate
+    calculate = st.button("Calculate")
 
     # Function to calculate tax savings
     def calculate_tax_savings(contribution, tax_rate):
@@ -424,33 +479,16 @@ elif page == "HSA & FSA Savings Calculator":
         # Calculate potential savings
         savings = calculate_tax_savings(contribution, tax_rate)
 
-        # Column 2: Display Graph
-        with col2:
-            # Create the graph using Plotly
-            fig = go.Figure(data=[
-                go.Bar(name="Contribution", x=["Contribution"], y=[contribution], marker_color='blue'),
-                go.Bar(name="Tax Savings", x=["Tax Savings"], y=[savings], marker_color='green')
-            ])
-
-            # Customize the layout of the graph
-            fig.update_layout(
-                title="Contribution vs. Tax Savings",
-                xaxis_title="Category",
-                yaxis_title="Amount ($)",
-                barmode='group'
-            )
-
-            # Show the graph in Streamlit
-            st.plotly_chart(fig)
-
-        # Display the calculated savings below the inputs
-        st.write(f"With an annual contribution of ${contribution:,} to your {account_type}, you could save approximately ${savings:,.2f} in taxes based on a tax rate of {tax_rate}%.")
+        # Display the calculated savings
+        st.markdown(f"<h1 style='text-align: center;'> Tax Savings </h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center; color: green;'>${savings:,.2f}</h1>", unsafe_allow_html=True)
+        st.write(f"Based on an annual contribution of ${contribution:,} to your {account_type} and a tax rate of {tax_rate}%.")
 
     # Provide a reminder about contribution limits
     st.subheader("Contribution Limits (2024):")
     st.write("- **HSA**: Up to $4,150 (self-only) or $8,300 (family)")
     st.write("- **FSA**: Up to $3,200 (health care) or $5,000 (dependent care)")
-           
+
 # Financial Literacy Resources Page
 elif page == "Financial Literacy Resources":
     st.title("Financial Literacy Resources")
