@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
+
 # Define federal tax brackets and rates
 federal_tax_brackets = [
     {"taxRate": 0.10, "maxIncome": 9950},
@@ -341,7 +342,7 @@ if 'quizzes' not in st.session_state:
 st.sidebar.title("FutureVault")
 page = st.sidebar.radio("Select Page", ("Introduction","Dashboard", "Investments", "Quiz", "Financial Literacy Resources", "HSA & FSA Savings Calculator", "Understand your income", ""))
 
-# Dashboard Page
+# Introduction
 if page == "Introduction":
     st.title("FutureVault")
 
@@ -550,28 +551,60 @@ elif page == "Understand your income":
         return income * tax_rate
 
     # Streamlit UI
-    st.title("Tax Calculator")
+    st.title("Understanding your Income")
+
+    st.markdown("""
+    Before we calculate your income, it's essential to understand the deductions that will be applied:
+
+    - ****: 
+    - **State Taxes**: Similar to federal taxes, these are taxes imposed by your state government. The rates and regulations vary widely between states.
+    - **Social Security**: This is a federal program that provides benefits for retirees, the disabled, and survivors of deceased workers. A portion of your income is deducted for this program.
+    - **Medicare**: This is a federal program that provides health coverage for individuals over 65 and some younger people with disabilities. Like Social Security, a portion of your income is deducted for Medicare.
+
+    ### 50/30/20 Rule
+    The 50/30/20 rule is a simple budgeting guideline that suggests you allocate your after-tax income as follows:
+    - **50%** for Needs: Essential expenses such as housing, utilities, and groceries.
+    - **30%** for Wants: Non-essential expenses like dining out, entertainment, and vacations.
+    - **20%** for Savings: Money set aside for future goals, such as retirement savings or an emergency fund.
+
+    This rule can help you manage your finances and ensure you are saving for the future while still enjoying your current lifestyle.
+    """)
+    faqs = [
+        {"question": "Federal Taxes", 
+         "answer": "These are taxes imposed by the federal government on your income. The rates can vary based on your income level and filing status."},
+        
+        {"question": "What does an emergency fund do?", 
+         "answer": "An emergency fund is a financial safety net for unexpected expenses or financial emergencies."},
+        
+        {"question": "What is compounding?", 
+         "answer": "Compounding is the process where the interest earned on an investment also earns interest, resulting in exponential growth over time."}
+    ]
+    
+    for faq in faqs:
+        with st.expander(faq['question']):
+            st.write(faq['answer'])
 
     # Initialize session state for income and state
     if 'state' not in st.session_state:
         st.session_state['state'] = "-- Select State --"
     if 'income' not in st.session_state:
         st.session_state['income'] = 0.0
+    if 'pay_period' not in st.session_state:
+        st.session_state['pay_period'] = "Monthly"
 
-    # # User input for state and income
-    # state = st.selectbox("Select State", ["-- Select State --"] + list(flat_state_tax_rates.keys()) + list(state_tax_brackets.keys()), index=list(flat_state_tax_rates.keys()).index(st.session_state['state']) if st.session_state['state'] != "-- Select State --" else 0)
-    # income = st.number_input("Enter Annual Income", min_value=0.0, step=1000.0, value=st.session_state['income'])
     # User input for state and income
     state_options = ["-- Select State --"] + list(flat_state_tax_rates.keys()) + list(state_tax_brackets.keys())
     state = st.selectbox("Select State", state_options, index=0)
     income = st.number_input("Enter Annual Income", min_value=0.0, step=1000.0, value=st.session_state['income'])
+    pay_period = st.selectbox("How often do you get paid?", ["Monthly", "Biweekly"])
     # Use session state for selectbox and number input
 
     # Store values in session state
     st.session_state['state'] = state
     st.session_state['income'] = income
+    st.session_state['pay_period'] = pay_period
 
-    if state != "-- Select State --" and income > 0:
+    if state != "-- Select State --" and income > 0 and pay_period:
         # Federal tax calculation
         federal_tax = calculate_federal_tax(income)
 
@@ -583,16 +616,63 @@ elif page == "Understand your income":
         else:
             state_tax = 0  # Default for states with no tax
 
-
         total_tax = federal_tax + state_tax
         after_tax_income = income - total_tax
 
+        # Calculate available income for savings
+        if pay_period == "Monthly":
+            monthly_income = after_tax_income / 12
+        else:  # Biweekly
+            monthly_income = after_tax_income / 26  # Assuming 52 weeks in a year
+
+        # Calculate savings based on the 50/30/20 rule
+        savings = monthly_income * 0.20
+        needs = monthly_income * 0.50
+        wants = monthly_income * 0.30
+
         # Display results
-        st.subheader("Calculation Results")
-        st.write(f"**Federal Tax:** ${federal_tax:,.2f}")
-        st.write(f"**State Tax:** ${state_tax:,.2f}")
-        st.write(f"**Total Tax:** ${total_tax:,.2f}")
-        st.write(f"**After-Tax Income:** ${after_tax_income:,.2f}")
+        st.subheader("Income Analysis Report")
+        # st.write(f"**Federal Tax:** ${federal_tax:,.2f}")
+        # st.write(f"**State Tax:** ${state_tax:,.2f}")
+        # st.write(f"**Total Tax:** ${total_tax:,.2f}")
+        # st.write(f"**After-Tax Income:** ${after_tax_income:,.2f}")
+        # st.write(f"**Monthly Income After Tax:** ${monthly_income:,.2f}")
+        # st.write(f"**Savings (20%):** ${savings:,.2f}")
+        # st.write(f"**Needs (50%):** ${needs:,.2f}")
+        # st.write(f"**Wants (30%):** ${wants:,.2f}")
+
+        # Pie chart for total taxed amount vs after-tax income
+        labels1 = ['Total Tax', 'After-Tax Income']
+        sizes1 = [total_tax, after_tax_income]
+        colors1 = ['#ff9999', '#66b3ff']  # Light Coral and Light Blue
+
+        fig1 = go.Figure(data=[go.Pie(labels=labels1, values=sizes1, hole=.2, 
+                                        marker=dict(colors=colors1), 
+                                        textinfo='label+value',  # Show label and percent
+                                        textposition='outside',  # Labels outside the pie chart
+                                        hoverinfo='value', textfont=dict(size=16))])
+
+
+        fig1.update_layout(title_text='Total Tax vs After-Tax Income', title_font_size=20)
+        st.plotly_chart(fig1)
+
+        # Pie chart for savings, needs, and wants
+        labels2 = ['Needs (50%)', 'Wants (30%)', 'Savings (20%)']
+        sizes2 = [round(needs, 2), round(wants, 2), round(savings,2)]
+        colors2 = ['#ff7f0e', '#2ca02c', '#1f77b4']  # Blue, Orange, Green
+
+        fig2 = go.Figure(data=[go.Pie(labels=labels2, values=sizes2, hole=.2, 
+                                        marker=dict(colors=colors2), 
+                                        textinfo='label+value',  # Show label and percent
+                                        textposition='outside',  # Labels outside the pie chart
+                                        hoverinfo='value', textfont=dict(size=16))
+                                        ])
+
+        if pay_period == "Monthly":
+            fig2.update_layout(title_text='Monthly Income Allocation', title_font_size=20)
+        else:  # Biweekly
+            fig2.update_layout(title_text='Biweekly Income Allocation', title_font_size=20)
+        st.plotly_chart(fig2)
     else:
         st.write("Please enter valid income and select a state.")
 
