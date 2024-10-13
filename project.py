@@ -2,7 +2,13 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import streamlit as st
+import yfinance as yf
+import pandas as pd
 
+
+
+user_after_tax_income = 0
 
 
 # Define federal tax brackets and rates
@@ -326,25 +332,28 @@ flat_state_tax_rates = {
     # Add more flat tax states here...
 }
 
-# Initialize session state
-if 'income_data' not in st.session_state:
-    st.session_state.income_data = []
-if 'expense_data' not in st.session_state:
-    st.session_state.expense_data = []
-if 'debt_data' not in st.session_state:
-    st.session_state.debt_data = []
-if 'savings_data' not in st.session_state:
-    st.session_state.savings_data = []
-if 'quizzes' not in st.session_state:
-    st.session_state.quizzes = []
-
 # Sidebar for navigation
 st.sidebar.title("FutureVault")
-page = st.sidebar.radio("Select Page", ("Introduction","Dashboard", "Investments", "Quiz", "Financial Literacy Resources", "HSA & FSA Savings Calculator", "Understand your income", ""))
+page = st.sidebar.radio("Select Page", ("Introduction","Understand your income", "Investments", "Dashboard", "Health Savings", "401k Retirement Plan", "Financial Literacy Resources"))
 
-# Introduction
+
 if page == "Introduction":
     st.title("FutureVault")
+
+    # Introduction Section
+    st.write("""
+    First step into getting familiar with your money. Our goal is to empower you to make informed decisions and achieve your financial goals.
+    
+    ### What can you see here?
+    
+    - **Understand your income📊** 
+                 
+    - **Health Insurance 📊**
+                      
+    - **Build Emergency Funds 💸**
+    
+    - **Start Investing 📈**
+                 """)
 
     # FAQ Section
     st.write("## Frequently Asked Questions (FAQs)")
@@ -366,97 +375,71 @@ if page == "Introduction":
 
 # Dashboard Page
 elif page == "Dashboard":
-    st.title("Financial Management Dashboard")
-    
-    # Display financial summaries
-    total_income = sum(income['amount'] for income in st.session_state.income_data)
-    total_expenses = sum(expense['amount'] for expense in st.session_state.expense_data)
-    total_debt = sum(debt['amount'] for debt in st.session_state.debt_data)
-    total_savings = sum(saving['amount'] for saving in st.session_state.savings_data)
-    
-    st.write(f"Total Income: ${total_income}")
-    st.write(f"Total Expenses: ${total_expenses}")
-    st.write(f"Total Debt: ${total_debt}")
-    st.write(f"Total Savings: ${total_savings}")
+    st.title("Build Your Emergency Fund")
 
-    # FAQ Section
-    st.write("## Frequently Asked Questions (FAQs)")
-    faqs = [
-        {"question": "What is a budget?", 
-         "answer": "A budget is a plan that outlines your expected income and expenses over a period, helping you manage your finances effectively."},
-        
-        {"question": "What does an emergency fund do?", 
-         "answer": "An emergency fund is a financial safety net for unexpected expenses or financial emergencies."},
-        
-        {"question": "What is compounding?", 
-         "answer": "Compounding is the process where the interest earned on an investment also earns interest, resulting in exponential growth over time."}
-    ]
+    # Explanation of Emergency Funds
+    st.write("""
+    ## What is an Emergency Fund?
+    An emergency fund is essential to cover unexpected expenses like medical emergencies, car repairs, or sudden job loss. 
+    Financial experts recommend having an emergency fund that can cover at least 6 months' worth of living expenses.
+    This provides a safety net to avoid falling into debt during tough times.
+    """)
+
+    # Prompt the user for their average living expenses
+    avg_living_expense = st.number_input("Enter your average monthly living expenses ($):", min_value=0.0, step=100.0)
+
+    # Calculate the required emergency fund size (6 months of living expenses)
+    emergency_fund_size = avg_living_expense * 6
+    st.write(f"### Your recommended emergency fund size: ${emergency_fund_size}")
+
+    # Ask user how much time they want to save the emergency fund
+    time_to_save_months = st.number_input("In how many months would you like to save this emergency fund?", min_value=1, step=1)
+
+    # Calculate monthly savings goal
+    if time_to_save_months > 0:
+        monthly_savings_goal = emergency_fund_size / time_to_save_months
+        st.write(f"### You need to save ${monthly_savings_goal:.2f} per month to build your emergency fund in {time_to_save_months} months.")
     
+    yearly_income = st.number_input("Enter your after-tax yearly income ($):", min_value=0.0, step=1000.0)
+
+    monthly_income = yearly_income / 12
+
+    if monthly_income > 0:
+        if monthly_savings_goal > monthly_income:
+            st.warning(f"Your savings goal of \\${monthly_savings_goal:.2f} per month is higher than your available income of \\(${monthly_income:.2f}). Consider extending the time to save or reducing monthly expenses.")
+        else:
+            st.success(f"Your savings goal of \\${monthly_savings_goal:.2f} per month is achievable based on your monthly income of \\${monthly_income:.2f}.")
+
+
+           
+elif page == "Health Savings":
+    st.title("Health Savings")
+    st.write("""
+    Estimate your potential tax savings when contributing to Health Savings Account (HSA) or Flexible Spending Account (FSA).
+    """)
+
+    faqs = [
+    {"question": "What is a Health Savings Account (HSA)?", 
+     "answer": "An HSA is a tax-advantaged savings account designed for individuals with high-deductible health plans to save money for medical expenses."},
+    
+    {"question": "What is a Flexible Spending Account (FSA)?", 
+     "answer": "An FSA is an employer-sponsored benefit that allows employees to set aside pre-tax dollars for specific health care and dependent care expenses."},
+    
+    {"question": "What are the main differences between HSA and FSA?", 
+     "answer": "HSAs are only available with high-deductible health plans, have no use-it-or-lose-it rule, and the funds can be invested. FSAs are available with any health plan, typically have a use-it-or-lose-it rule, and funds cannot be invested."},
+    
+    {"question": "Can I have both an HSA and FSA?", 
+     "answer": "Generally, you cannot contribute to both an HSA and a general-purpose FSA in the same year. However, you may be able to have an HSA and a limited-purpose FSA for dental and vision expenses."},
+
+    {"question": "What are the tax advantages of HSAs and FSAs?", 
+     "answer": "Both HSAs and FSAs offer tax benefits. contributions to both HSAs and FSAs are typically made with pre-tax dollars, reducing your taxable income for the year, and withdrawals for qualified medical expenses are tax-free."}
+]
+
     for faq in faqs:
         with st.expander(faq['question']):
             st.write(faq['answer'])
 
-# # HSA and FSA Savings Calculator Page
-# elif page == "HSA & FSA Savings Calculator":
-#     st.title("HSA and FSA Savings Calculator with Graph")
-#     st.write("""
-#     Estimate your potential tax savings when contributing to Health Savings Account (HSA) or Flexible Spending Account (FSA), and see the impact visually.
-#     """)
-
-#     # Layout: side-by-side columns for inputs and graph
-#     col1, col2 = st.columns(2)
-
-#     # Column 1: User Inputs
-#     with col1:
-#         account_type = st.selectbox("Choose Account Type", ("HSA", "FSA"))
-#         contribution = st.number_input("Enter your annual contribution ($):", min_value=0, max_value=10000, step=100)
-#         income = st.number_input("Enter your annual income ($):", min_value=0, step=1000)
-#         tax_rate = st.slider("Enter your estimated tax rate (%):", 0, 50, 20)
-        
-#         # Button to calculate
-#         calculate = st.button("Calculate")
-
-#     # Function to calculate tax savings
-#     def calculate_tax_savings(contribution, tax_rate):
-#         return contribution * (tax_rate / 100)
-
-#     # Only calculate and display results when button is clicked
-#     if calculate:
-#         # Calculate potential savings
-#         savings = calculate_tax_savings(contribution, tax_rate)
-
-#         # Column 2: Display Graph
-#         with col2:
-#             # Create the graph using Plotly
-#             fig = go.Figure(data=[
-#                 go.Bar(name="Contribution", x=["Contribution"], y=[contribution], marker_color='blue'),
-#                 go.Bar(name="Tax Savings", x=["Tax Savings"], y=[savings], marker_color='green')
-#             ])
-
-#             # Customize the layout of the graph
-#             fig.update_layout(
-#                 title="Contribution vs. Tax Savings",
-#                 xaxis_title="Category",
-#                 yaxis_title="Amount ($)",
-#                 barmode='group'
-#             )
-
-#             # Show the graph in Streamlit
-#             st.plotly_chart(fig)
-
-#         # Display the calculated savings below the inputs
-#         st.write(f"With an annual contribution of ${contribution:,} to your {account_type}, you could save approximately ${savings:,.2f} in taxes based on a tax rate of {tax_rate}%.")
-
-#     # Provide a reminder about contribution limits
-#     st.subheader("Contribution Limits (2024):")
-#     st.write("- **HSA**: Up to $4,150 (self-only) or $8,300 (family)")
-#     st.write("- **FSA**: Up to $3,200 (health care) or $5,000 (dependent care)")
-           
-elif page == "HSA & FSA Savings Calculator":
-    st.title("HSA and FSA Savings Calculator")
-    st.write("""
-    Estimate your potential tax savings when contributing to Health Savings Account (HSA) or Flexible Spending Account (FSA).
-    """)
+    st.subheader("Let's estimate your HSA/FSA savings for the year")
 
     # User Inputs
     account_type = st.selectbox("Choose Account Type", ("HSA", "FSA"))
@@ -516,41 +499,73 @@ elif page == "Financial Literacy Resources":
 
 # Savings Tracker Page
 elif page == "Investments":
-    st.title("Savings Tracker")
-    
-    with st.form("savings_form"):
-        savings_goal = st.text_input("Savings Goal Name")
-        savings_amount = st.number_input("Amount", min_value=0.0)
-        submitted = st.form_submit_button("Add Savings")
-        
-        if submitted:
-            st.session_state.savings_data.append({'goal': savings_goal, 'amount': savings_amount})
-            st.success("Savings Goal Added Successfully!")
+    # Title of the app
+    st.title("Investment Dashboard")
 
-    st.write("### Savings Data")
-    if st.session_state.savings_data:
-        savings_df = pd.DataFrame(st.session_state.savings_data)
-        st.dataframe(savings_df)
+    st.write("Investing in stocks can offer the potential for significant long-term returns, outpacing inflation and helping you build wealth. However, it's important to remember that investing also involves risk, and there's no guarantee of profits.")
+    st.subheader("**If you're a beginner, it's generally recommended to prioritize paying off high-interest debt before investing.**")
 
-# Quiz Page
-elif page == "Quiz":
-    st.title("Financial Literacy Quiz")
-    
-    quizzes = [
-        {"question": "What is a budget?", "options": ["A plan for spending", "A type of investment", "A form of debt"], "answer": "A plan for spending"},
-        {"question": "What does an emergency fund do?", "options": ["Helps you invest", "Covers unexpected expenses", "Increases your debt"], "answer": "Covers unexpected expenses"},
-        {"question": "What is compounding?", "options": ["Interest on interest", "Debt accumulation", "Investment diversification"], "answer": "Interest on interest"},
+    # FAQs
+    faqs = [
+        {"question": "What are stocks?",
+        "answer": "Stocks represent ownership shares in a company. When you invest in stocks, you're essentially becoming a part-owner of the company."},
+
+        {"question": "What are bonds?",
+        "answer": "Bonds are essentially loans made to corporations or governments. When you invest in bonds, you're lending money to these entities in exchange for interest payments."},
+
+        {"question": "What are ETFs (Exchange-Traded Funds)?",
+        "answer": "ETFs are similar to mutual funds but are traded on stock exchanges like individual stocks. They offer a way to invest in a basket of assets, such as stocks or bonds, in a single trade."},
+
+        {"question": "What is the difference between stocks and bonds?",
+        "answer": "Stocks generally offer higher potential returns but also come with higher risk. Bonds typically provide more stable returns but may not grow as much in value over time."},
+
+        {"question": "What is diversification and why is it important?",
+        "answer": "Diversification means spreading your investments across different asset classes to reduce risk. By diversifying, you're less likely to lose a significant portion of your portfolio if one investment performs poorly."}
     ]
-    
-    for quiz in quizzes:
-        st.write(f"**{quiz['question']}**")
-        selected_option = st.radio("Select an option", quiz['options'], key=quiz['question'])
+
+    for faq in faqs:
+        with st.expander(faq['question']):
+            st.write(faq['answer'])
+
+    # Stock information section
+    st.header("Stock Information")
+    ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, GOOGL):", "AAPL")
+
+    if ticker:
+        stock_data = yf.Ticker(ticker)
         
-        if st.button("Submit", key=quiz['question']):
-            if selected_option == quiz['answer']:
-                st.success("Correct!")
-            else:
-                st.error("Incorrect, try again!")
+        # Fetch historical market data for the past year
+        hist = stock_data.history(period="1y")  # Get last year's data
+        
+        # Display stock information
+        st.subheader(f"Stock Data for {ticker}")
+        # st.write(hist)
+
+        # Display stock info
+        info = stock_data.info
+        st.write(f"**Company Name:** {info.get('longName', 'N/A')}")
+        st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+        st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
+
+        # Plotting stock price for the past year using Plotly
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=hist.index, y=hist['Close'], mode='lines', name='Close Price'))
+
+        # Add layout details
+        fig.update_layout(title=f'{ticker} Stock Price Over the Last Year',
+                        xaxis_title='Date',
+                        yaxis_title='Stock Price (USD)',
+                        xaxis_rangeslider_visible=True)
+
+        # Display the Plotly chart
+        st.plotly_chart(fig)
+
+    # Additional resources section
+    st.header("Additional Resources")
+    st.write("""
+    - [Investopedia](https://www.investopedia.com): A great resource for learning about investing.
+    - [Yahoo Finance](https://finance.yahoo.com): For real-time stock market news and data.
+    """)
 
 elif page == "Understand your income":
 
@@ -591,37 +606,42 @@ elif page == "Understand your income":
     # Streamlit UI
     st.title("Understanding your Income")
 
-    st.markdown("""
-    Before we calculate your income, it's essential to understand the deductions that will be applied:
+    st.subheader("""Before we calculate your income, it's essential to understand the deductions that will be applied:""")
 
-    - ****: 
-    - **State Taxes**: Similar to federal taxes, these are taxes imposed by your state government. The rates and regulations vary widely between states.
-    - **Social Security**: This is a federal program that provides benefits for retirees, the disabled, and survivors of deceased workers. A portion of your income is deducted for this program.
-    - **Medicare**: This is a federal program that provides health coverage for individuals over 65 and some younger people with disabilities. Like Social Security, a portion of your income is deducted for Medicare.
-
-    ### 50/30/20 Rule
-    The 50/30/20 rule is a simple budgeting guideline that suggests you allocate your after-tax income as follows:
-    - **50%** for Needs: Essential expenses such as housing, utilities, and groceries.
-    - **30%** for Wants: Non-essential expenses like dining out, entertainment, and vacations.
-    - **20%** for Savings: Money set aside for future goals, such as retirement savings or an emergency fund.
-
-    This rule can help you manage your finances and ensure you are saving for the future while still enjoying your current lifestyle.
-    """)
     faqs = [
-        {"question": "Federal Taxes", 
-         "answer": "These are taxes imposed by the federal government on your income. The rates can vary based on your income level and filing status."},
-        
-        {"question": "What does an emergency fund do?", 
-         "answer": "An emergency fund is a financial safety net for unexpected expenses or financial emergencies."},
-        
-        {"question": "What is compounding?", 
-         "answer": "Compounding is the process where the interest earned on an investment also earns interest, resulting in exponential growth over time."}
+        {
+            "question": "What are Federal Taxes?",
+            "answer": "Federal taxes are imposed by the federal government on your income. The rates can vary based on your income level and filing status."
+        },
+        {
+            "question": "What are State Taxes?",
+            "answer": "Similar to federal taxes, these are taxes imposed by your state government. The rates and regulations vary widely between states."
+        },
+        {
+            "question": "What is Social Security?",
+            "answer": "Social Security is a federal program that provides benefits for retirees, the disabled, and survivors of deceased workers. A portion of your income is deducted for this program."
+        },
+        {
+            "question": "What is Medicare?",
+            "answer": "Medicare is a federal program that provides health coverage for individuals over 65 and some younger people with disabilities. Like Social Security, a portion of your income is deducted for Medicare."
+        }
     ]
+
+    for faq in faqs:
+        with st.expander(faq['question']):
+            st.write(faq['answer'])
+    st.subheader("""Let's now understand our income and manage our finances.""")
+    
+    faqs = [
+        {
+            "question": "What is the 50/30/20 Rule?",
+            "answer": "The 50/30/20 rule is a budgeting guideline that suggests allocating your after-tax income as follows:\n\n- 50% for Needs: Essential expenses such as housing, utilities, and groceries.\n- 30% for Wants: Non-essential expenses like dining out, entertainment, and vacations.\n- 20% for Savings: Money set aside for future goals, such as retirement savings or an emergency fund."
+        }]
     
     for faq in faqs:
         with st.expander(faq['question']):
             st.write(faq['answer'])
-
+    
     # Initialize session state for income and state
     if 'state' not in st.session_state:
         st.session_state['state'] = "-- Select State --"
@@ -656,6 +676,7 @@ elif page == "Understand your income":
 
         total_tax = federal_tax + state_tax
         after_tax_income = income - total_tax
+        user_after_tax_income = after_tax_income
 
         # Calculate available income for savings
         if pay_period == "Monthly":
@@ -686,36 +707,102 @@ elif page == "Understand your income":
 
         fig1 = go.Figure(data=[go.Pie(labels=labels1, values=sizes1, hole=.2, 
                                         marker=dict(colors=colors1), 
-                                        textinfo='label+value',  # Show label and percent
+                                        texttemplate='%{label}:  $%{value}',
                                         textposition='outside',  # Labels outside the pie chart
-                                        hoverinfo='value', textfont=dict(size=16))])
+                                        hoverinfo='label', textfont=dict(size=16))])
 
 
-        fig1.update_layout(title_text='Total Tax vs After-Tax Income', title_font_size=20)
+        fig1.update_layout(title_text='Total Tax vs After-Tax Income', title_font_size=20, legend=dict(font=dict(size=20)))
         st.plotly_chart(fig1)
 
         # Pie chart for savings, needs, and wants
-        labels2 = ['Needs (50%)', 'Wants (30%)', 'Savings (20%)']
+        labels2 = ['Needs', 'Wants', 'Savings']
         sizes2 = [round(needs, 2), round(wants, 2), round(savings,2)]
         colors2 = ['#ff7f0e', '#2ca02c', '#1f77b4']  # Blue, Orange, Green
 
         fig2 = go.Figure(data=[go.Pie(labels=labels2, values=sizes2, hole=.2, 
                                         marker=dict(colors=colors2), 
-                                        textinfo='label+value',  # Show label and percent
+                                        texttemplate='%{label}:  $%{value}',  # Show label and percent
                                         textposition='outside',  # Labels outside the pie chart
-                                        hoverinfo='value', textfont=dict(size=16))
+                                        hoverinfo='percent', textfont=dict(size=16))
                                         ])
 
         if pay_period == "Monthly":
-            fig2.update_layout(title_text='Monthly Income Allocation', title_font_size=20)
+            fig2.update_layout(title_text='Monthly Income Allocation', title_font_size=20, legend=dict(font=dict(size=20)))
         else:  # Biweekly
-            fig2.update_layout(title_text='Biweekly Income Allocation', title_font_size=20)
+            fig2.update_layout(title_text='Biweekly Income Allocation', title_font_size=20, legend=dict(font=dict(size=20)))
         st.plotly_chart(fig2)
     else:
         st.write("Please enter valid income and select a state.")
-
-    # Reset button (clear session state)
+    
+        # Reset button (clear session state)
     if st.button('Reset'):
         st.session_state['state'] = "-- Select State --"
         st.session_state['income'] = 0.0
         st.experimental_rerun()
+
+elif page == "401k Retirement Plan":
+
+    st.title("401(k) Retirement Plan")
+
+    st.write("""
+    A **401(k)** is a retirement savings plan sponsored by an employer that allows employees to save a portion of their paycheck before taxes are taken out. This means you can save money on taxes today and enjoy tax-deferred growth until you withdraw funds during retirement. Many employers offer matching contributions, which can significantly boost your retirement savings.
+
+    This section allows you to estimate the growth of your 401(k) retirement plan based on your contributions and a specified interest rate.
+    """)
+
+    # User Inputs
+    with st.form("401k_form"):
+        initial_investment = st.number_input("Initial Investment ($):", min_value=0.0, value=5000.0)
+        
+        # Contribution frequency: Monthly or Biweekly
+        contribution_frequency = st.selectbox("How are you contributing?", ["Monthly", "Biweekly"])
+        
+        # Input based on the frequency
+        if contribution_frequency == "Monthly":
+            contribution_per_paycheck = st.number_input("Contribution per Month ($):", min_value=0.0, value=500.0)
+            contributions_per_year = 12  # 12 months in a year
+            periods_in_a_year = 12  # Monthly compounding
+        else:
+            contribution_per_paycheck = st.number_input("Contribution per Biweekly Paycheck ($):", min_value=0.0, value=500.0)
+            contributions_per_year = 26  # 26 biweekly paychecks in a year
+            periods_in_a_year = 26  # Biweekly contributions
+
+        # Automatically calculate the total annual contribution
+        annual_contribution = contribution_per_paycheck * contributions_per_year
+
+        years = st.number_input("Number of Years until Retirement:", min_value=1, max_value=50, value=30)
+        annual_interest_rate = st.slider("Estimated Annual Interest Rate (%):", 0.0, 15.0, 5.0)
+
+        # Calculate the estimated 401(k) balance
+        calculate_401k = st.form_submit_button("Calculate 401(k) Balance")
+
+        if calculate_401k:
+            # Contribution per period based on the frequency
+            future_value = initial_investment
+            interest_rate_decimal = annual_interest_rate / 100
+
+            # Interest is compounded monthly for simplicity (12 periods per year for monthly, 26 for biweekly)
+            interest_rate_per_period = (1 + interest_rate_decimal) ** (1 / periods_in_a_year) - 1
+            
+            # Calculate future value with contributions and compound interest
+            total_periods = years * periods_in_a_year  # Total number of contribution periods (12 for monthly, 26 for biweekly)
+
+            for period in range(total_periods):
+                future_value *= (1 + interest_rate_per_period)  # Apply interest first
+                future_value += contribution_per_paycheck  # Add contribution every period, regardless of frequency
+
+            st.write(f"**Estimated 401(k) Balance After {years} Years:** ${future_value:,.2f}")
+
+            # Create the line graph for future value growth
+            x_values = list(range(1, total_periods + 1))
+            y_values = [initial_investment]
+            for period in range(total_periods):
+                y_values.append(y_values[-1] * (1 + interest_rate_per_period) + contribution_per_paycheck)
+
+            # Create a line chart
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=x_values, y=y_values[1:], mode='lines+markers', name='401(k) Growth'))
+            fig.update_layout(title="401(k) Growth Over Time", xaxis_title="Periods", yaxis_title="Balance ($)")
+            st.plotly_chart(fig)
+
