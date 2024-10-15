@@ -1,46 +1,24 @@
-if page == "Dashboard":
-    st.title("Financial Management Dashboard")
-    
-    # Introduction Section
-    st.write("""
-    Welcome to a Streamlit-based personal finance dashboard. This intuitive dashboard is designed to give you a visual representation of your finances over time, empowering you to make informed decisions and achieve your financial goals.
-    
-    ### What can you see here?
-    
-    - **Track your income and expenses 📊**: See exactly where your money comes from and goes. Easy-to-read visualizations break down your income streams and spending habits, helping you identify areas for potential savings or growth. Gain a comprehensive understanding of your financial patterns to make informed decisions about budgeting and resource allocation.
-    
-    - **Monitor your cash flow 💸**: Stay on top of your incoming and outgoing funds. This dashboard provides clear insight into your current financial liquidity, allowing you to plan for upcoming expenses and avoid potential shortfalls. Anticipate cash crunches and optimize your spending timing to maintain a healthy financial balance.
-    
-    - **View your financial progress 📈**: Charts and graphs track your progress towards your financial goals over time. Whether you're saving for a dream vacation or planning for retirement, this dashboard keeps you motivated and on track. Visualize your long-term financial journey and adjust your strategies based on real-time performance data.
-    """)
+## Inspiration
+In today’s fast-paced world, many young professionals lack the knowledge and tools to achieve financial stability and independence. Our project, **FutureVault**, aims to empower individuals to take control of their financial futures.
 
-    # FAQ Section
-    st.write("## Frequently Asked Questions (FAQs)")
-    faqs = [
-        {"question": "What is a budget?", 
-         "answer": "A budget is a plan that outlines your expected income and expenses over a period, helping you manage your finances effectively."},
-        
-        {"question": "What does an emergency fund do?", 
-         "answer": "An emergency fund is a financial safety net for unexpected expenses or financial emergencies."},
-        
-        {"question": "What is compounding?", 
-         "answer": "Compounding is the process where the interest earned on an investment also earns interest, resulting in exponential growth over time."}
-    ]
-    
-    for faq in faqs:
-        with st.expander(faq['question']):
-            st.write(faq['answer'])
+## What it does
+**FutureVault** is an online platform that provides structured personal finance education, covering budgeting, investing, and financial literacy. We offer a range of courses, tools, and community support to help users set and achieve their long-term financial goals.
 
-elif page == "Records":
-    st.title("Financial Summary Records")
-    
-    # Display financial summaries
-    total_income = sum(income['amount'] for income in st.session_state.income_data)
-    total_expenses = sum(expense['amount'] for expense in st.session_state.expense_data)
-    total_debt = sum(debt['amount'] for debt in st.session_state.debt_data)
-    total_savings = sum(saving['amount'] for saving in st.session_state.savings_data)
-    
-    st.write(f"**Total Income:** ${total_income}")
-    st.write(f"**Total Expenses:** ${total_expenses}")
-    st.write(f"**Total Debt:** ${total_debt}")
-    st.write(f"**Total Savings:** ${total_savings}")
+## How we built it
+We developed **FutureVault** by collaborating with financial experts to create high-quality, engaging content. Our platform combines interactive courses, practical resources, and a supportive online community to foster financial literacy and accountability.
+
+## Challenges we ran into
+One of the biggest challenges we faced was creating content that appeals to diverse learning styles. Additionally, ensuring our platform was user-friendly while still being comprehensive required significant iterations based on user feedback.
+
+## Accomplishments that we're proud of
+We are proud to have launched our platform with over **1000 registered users** within the first month. Our users report feeling more confident in their financial decisions and have started setting achievable financial goals.
+
+## What we learned
+We learned that community support is vital for fostering good financial habits. Engaging users through discussion forums and social media has significantly enhanced their learning experience and commitment to their financial journeys.
+
+## What's next for FutureVault
+Looking ahead, we plan to expand our course offerings and develop personalized financial planning tools to assist our users further. Our goal is to become a leading resource for financial education, enabling individuals to achieve financial independence and security.
+
+## Built With
+- Python
+- Streamlit
